@@ -247,7 +247,7 @@ function renderList() {
 
   if (!filtered.length) {
     const row = document.createElement("tr");
-    row.innerHTML = `<td colspan="9"><div class="empty-state small">No escalations match the active filters.</div></td>`;
+    row.innerHTML = `<td colspan="10"><div class="empty-state small">No escalations match the active filters.</div></td>`;
     els.listTableBody.appendChild(row);
     return;
   }
@@ -259,6 +259,7 @@ function renderList() {
     }
     tr.innerHTML = `
       <td>${item.ticketNumber || "NA"}</td>
+      <td>${item.sourceFunction || "Service"}</td>
       <td>${item.customer}</td>
       <td>${item.vendor}</td>
       <td>${item.category}</td>
@@ -445,7 +446,7 @@ function handleCreateEscalation(event) {
     closedAt: formData.get("status") === "Closed" ? now : null,
     ticketNumber: formData.get("ticketNumber").trim() || "NA",
     equipment: formData.get("equipment").trim() || "Unspecified",
-    sourceFunction: "Manual Entry",
+    sourceFunction: formData.get("sourceFunction"),
     sourceLine: "",
     attachments,
     actions: [
