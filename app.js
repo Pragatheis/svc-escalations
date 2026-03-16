@@ -258,7 +258,7 @@ function renderList() {
       tr.classList.add("selected-row");
     }
     tr.innerHTML = `
-      <td>${item.id}</td>
+      <td>${item.ticketNumber || "NA"}</td>
       <td>${item.customer}</td>
       <td>${item.vendor}</td>
       <td>${item.category}</td>
