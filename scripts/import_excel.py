@@ -93,6 +93,13 @@ def infer_severity(reason: str, description: str, actions: str) -> str:
     return "Medium"
 
 
+def normalize_function(value: str) -> str:
+    normalized = clean(value).lower()
+    if normalized == "depot":
+        return "Depot"
+    return "Service"
+
+
 def load_rows() -> list[list[str]]:
     with zipfile.ZipFile(WORKBOOK_PATH) as archive:
         shared_strings = []
@@ -164,7 +171,7 @@ def build_record(row: list[str], index: int) -> dict:
         "id": f"ESC-{line.zfill(4)}" if line else f"ESC-UNK-{index}",
         "customer": customer or "Unknown customer",
         "vendor": vendor or "Unknown vendor",
-        "category": reason if reason and reason.lower() != "all" else (function or "General"),
+        "category": reason if reason and reason.lower() != "all" else "General",
         "severity": infer_severity(reason, description, resulting_actions),
         "status": status,
         "owner": "Unassigned",
@@ -175,7 +182,7 @@ def build_record(row: list[str], index: int) -> dict:
         "closedAt": f"{closed}T17:00:00" if closed else None,
         "ticketNumber": ticket_number or "NA",
         "equipment": equipment or "Unspecified",
-        "sourceFunction": function or "Unknown",
+        "sourceFunction": normalize_function(function),
         "sourceLine": line or "",
         "attachments": [],
         "actions": [
