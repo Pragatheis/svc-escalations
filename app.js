@@ -147,6 +147,10 @@ function bindEvents() {
 }
 
 function setView(view) {
+  if (view === "detail") {
+    ensureSelectedRecord();
+  }
+
   state.currentView = view;
   els.navLinks.forEach((link) => link.classList.toggle("active", link.dataset.view === view));
   els.views.forEach((panel) => panel.classList.toggle("active", panel.id === `view-${view}`));
@@ -245,6 +249,9 @@ function renderList() {
 
   filtered.forEach((item) => {
     const tr = document.createElement("tr");
+    if (item.id === state.selectedId) {
+      tr.classList.add("selected-row");
+    }
     tr.innerHTML = `
       <td>${item.id}</td>
       <td>${item.customer}</td>
@@ -259,13 +266,14 @@ function renderList() {
     tr.addEventListener("click", () => {
       state.selectedId = item.id;
       setView("detail");
-      renderDetail();
+      render();
     });
     els.listTableBody.appendChild(tr);
   });
 }
 
 function renderDetail() {
+  ensureSelectedRecord();
   const record = state.records.find((item) => item.id === state.selectedId);
 
   if (!record) {
@@ -567,6 +575,14 @@ function getFilteredRecords() {
       return item[key] === value;
     })
   );
+}
+
+function ensureSelectedRecord() {
+  const exists = state.records.some((item) => item.id === state.selectedId);
+  if (exists) return;
+
+  const filtered = getFilteredRecords();
+  state.selectedId = filtered[0]?.id ?? state.records[0]?.id ?? null;
 }
 
 function uniqueValues(key) {
