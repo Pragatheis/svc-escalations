@@ -201,11 +201,11 @@ function renderSidebarStats() {
 
 function renderFilters() {
   const options = {
-    customer: uniqueValues("customer"),
-    vendor: uniqueValues("vendor"),
+    customer: uniqueValues("customer").filter((value) => value !== "All"),
+    vendor: uniqueValues("vendor").filter((value) => value !== "All"),
     category: uniqueValues("category"),
     status: uniqueValues("status"),
-    severity: uniqueValues("severity"),
+    severity: ["Critical", "Urgent"],
     owner: uniqueValues("owner"),
     week: [...new Set(state.records.map((item) => getWeekLabel(item.createdAt)))].sort().reverse()
   };
