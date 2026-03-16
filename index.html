@@ -84,6 +84,13 @@
                   <input name="equipment" />
                 </label>
                 <label>
+                  Function
+                  <select name="sourceFunction" required>
+                    <option value="Service">Service</option>
+                    <option value="Depot">Depot</option>
+                  </select>
+                </label>
+                <label>
                   Category
                   <select name="category" required>
                     <option value="Supply">Supply</option>
@@ -190,6 +197,7 @@
                 <thead>
                   <tr>
                     <th>Ticket #</th>
+                    <th>Function</th>
                     <th>Customer</th>
                     <th>Vendor</th>
                     <th>Category</th>
