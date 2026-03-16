@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Escalation Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <p class="eyebrow">System of Record</p>
+          <h1>Escalation Tracker</h1>
+          <p class="subtitle">
+            Intake, review, and action management for customer and vendor escalations.
+          </p>
+        </div>
+
+        <nav class="nav">
+          <button class="nav-link active" data-view="intake">Intake</button>
+          <button class="nav-link" data-view="list">List</button>
+          <button class="nav-link" data-view="detail">Detail</button>
+          <button class="nav-link" data-view="review">Weekly Review</button>
+        </nav>
+
+        <section class="sidebar-card">
+          <p class="sidebar-label">This Week</p>
+          <div id="sidebarStats" class="sidebar-stats"></div>
+        </section>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Escalation Ops</p>
+            <h2 id="viewTitle">Intake</h2>
+          </div>
+          <div class="topbar-meta">
+            <div class="meta-chip">
+              <span>Records</span>
+              <strong id="recordCount">0</strong>
+            </div>
+            <div class="meta-chip">
+              <span>Open</span>
+              <strong id="openCount">0</strong>
+            </div>
+          </div>
+        </header>
+
+        <section id="view-intake" class="view active">
+          <div class="panel-grid intake-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Manual Entry</p>
+                  <h3>Create escalation</h3>
+                </div>
+              </div>
+              <form id="intakeForm" class="form-grid">
+                <label>
+                  Customer
+                  <input name="customer" required />
+                </label>
+                <label>
+                  Vendor
+                  <input name="vendor" required />
+                </label>
+                <label>
+                  Ticket #
+                  <input name="ticketNumber" />
+                </label>
+                <label>
+                  Equipment
+                  <input name="equipment" />
+                </label>
+                <label>
+                  Category
+                  <select name="category" required>
+                    <option value="Supply">Supply</option>
+                    <option value="Quality">Quality</option>
+                    <option value="Logistics">Logistics</option>
+                    <option value="Billing">Billing</option>
+                    <option value="Technical">Technical</option>
+                    <option value="Compliance">Compliance</option>
+                  </select>
+                </label>
+                <label>
+                  Severity
+                  <select name="severity" required>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </select>
+                </label>
+                <label>
+                  Status
+                  <select name="status" required>
+                    <option value="Open">Open</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Monitoring">Monitoring</option>
+                    <option value="Closed">Closed</option>
+                  </select>
+                </label>
+                <label>
+                  Owner
+                  <input name="owner" required />
+                </label>
+                <label>
+                  Due date
+                  <input type="date" name="dueDate" required />
+                </label>
+                <label>
+                  Attachments
+                  <input type="file" name="attachments" multiple />
+                </label>
+                <label class="span-2">
+                  Summary
+                  <input name="summary" required />
+                </label>
+                <label class="span-2">
+                  Description
+                  <textarea name="description" rows="5" required></textarea>
+                </label>
+                <label class="span-2">
+                  Immediate next action
+                  <input name="actionTitle" required />
+                </label>
+                <label>
+                  Action owner
+                  <input name="actionOwner" required />
+                </label>
+                <label>
+                  Action due
+                  <input type="date" name="actionDue" required />
+                </label>
+                <div class="span-2 form-actions">
+                  <button type="submit" class="primary-btn">Save escalation</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Paste Ticket</p>
+                  <h3>Quick parse</h3>
+                </div>
+                <button id="parseTicketBtn" class="secondary-btn">Parse text</button>
+              </div>
+              <label class="stacked">
+                Ticket text
+                <textarea
+                  id="ticketPaste"
+                  rows="18"
+                  placeholder="Paste email, case, or ticket text here. The parser will try to extract customer, vendor, severity, owner, and summary."
+                ></textarea>
+              </label>
+              <div class="note-card">
+                <p>Expected patterns</p>
+                <code>Customer: ACME Corp</code>
+                <code>Severity: High</code>
+                <code>Owner: Dana</code>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-list" class="view">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Filters</p>
+                <h3>Escalation backlog</h3>
+              </div>
+            </div>
+            <div id="filterBar" class="filter-bar"></div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Vendor</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Severity</th>
+                    <th>Owner</th>
+                    <th>Week</th>
+                    <th>Next action</th>
+                  </tr>
+                </thead>
+                <tbody id="listTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-detail" class="view">
+          <div id="detailEmpty" class="empty-state">
+            Select an escalation from the list to inspect history, actions, attachments, and notes.
+          </div>
+          <div id="detailContent" class="detail-layout hidden">
+            <section class="panel detail-summary">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Escalation Detail</p>
+                  <h3 id="detailTitle"></h3>
+                </div>
+                <span id="detailBadge" class="status-pill"></span>
+              </div>
+              <div id="detailMeta" class="detail-meta"></div>
+              <p id="detailDescription" class="detail-description"></p>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Actions</p>
+                  <h3>Open work</h3>
+                </div>
+              </div>
+              <div id="detailActions" class="list-stack"></div>
+              <form id="actionForm" class="mini-form">
+                <input name="title" placeholder="New action" required />
+                <input name="owner" placeholder="Owner" required />
+                <input type="date" name="dueDate" required />
+                <button type="submit" class="secondary-btn">Add action</button>
+              </form>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Notes</p>
+                  <h3>Working notes</h3>
+                </div>
+              </div>
+              <div id="detailNotes" class="list-stack"></div>
+              <form id="noteForm" class="mini-form note-form">
+                <textarea name="content" rows="3" placeholder="Add a note" required></textarea>
+                <button type="submit" class="secondary-btn">Add note</button>
+              </form>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">History</p>
+                  <h3>Timeline</h3>
+                </div>
+              </div>
+              <div id="detailHistory" class="timeline"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Attachments</p>
+                  <h3>Reference files</h3>
+                </div>
+              </div>
+              <div id="detailAttachments" class="list-stack"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-review" class="view">
+          <div class="review-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Weekly Review</p>
+                  <h3>Open items</h3>
+                </div>
+              </div>
+              <div id="reviewOpenItems" class="list-stack compact"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Weekly Review</p>
+                  <h3>Overdue actions</h3>
+                </div>
+              </div>
+              <div id="reviewOverdue" class="list-stack compact"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Weekly Review</p>
+                  <h3>Recently closed</h3>
+                </div>
+              </div>
+              <div id="reviewClosed" class="list-stack compact"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Weekly Review</p>
+                  <h3>Trends</h3>
+                </div>
+              </div>
+              <div id="reviewTrends" class="trend-grid"></div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="emptyListTemplate">
+      <div class="empty-state small">Nothing to show for the current selection.</div>
+    </template>
+    <script src="./data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
