@@ -1,4 +1,5 @@
 const STORAGE_KEY = "escalation-tracker-v2-sheet";
+const THEME_KEY = "escalation-tracker-theme";
 
 const fallbackSeedData = [
   {
@@ -102,6 +103,8 @@ const els = {
   navLinks: [...document.querySelectorAll(".nav-link")],
   views: [...document.querySelectorAll(".view")],
   viewTitle: document.getElementById("viewTitle"),
+  themeToggle: document.getElementById("themeToggle"),
+  themeToggleLabel: document.getElementById("themeToggleLabel"),
   recordCount: document.getElementById("recordCount"),
   openCount: document.getElementById("openCount"),
   sidebarStats: document.getElementById("sidebarStats"),
@@ -131,6 +134,7 @@ const els = {
 bootstrap();
 
 function bootstrap() {
+  applyInitialTheme();
   bindEvents();
   render();
 }
@@ -144,6 +148,7 @@ function bindEvents() {
   els.parseTicketBtn.addEventListener("click", handleParseTicket);
   els.actionForm.addEventListener("submit", handleAddAction);
   els.noteForm.addEventListener("submit", handleAddNote);
+  els.themeToggle.addEventListener("click", toggleTheme);
 }
 
 function setView(view) {
@@ -715,4 +720,21 @@ function isPast(dateString) {
 
 function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function applyInitialTheme() {
+  const savedTheme = localStorage.getItem(THEME_KEY) || "light";
+  document.documentElement.dataset.theme = savedTheme;
+  updateThemeToggleLabel(savedTheme);
+}
+
+function toggleTheme() {
+  const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = nextTheme;
+  localStorage.setItem(THEME_KEY, nextTheme);
+  updateThemeToggleLabel(nextTheme);
+}
+
+function updateThemeToggleLabel(theme) {
+  els.themeToggleLabel.textContent = theme === "dark" ? "Light mode" : "Dark mode";
 }
