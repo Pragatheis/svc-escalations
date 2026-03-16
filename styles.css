@@ -14,6 +14,35 @@
   --low: #6ba3c7;
   --shadow: 0 22px 60px rgba(0, 55, 99, 0.12);
   --radius: 24px;
+  --topbar-control-bg: rgba(255, 255, 255, 0.96);
+  --topbar-control-text: #003763;
+  --topbar-control-border: rgba(0, 55, 99, 0.12);
+  --table-row-hover: rgba(0, 203, 183, 0.08);
+  --table-row-selected: rgba(0, 156, 244, 0.1);
+  --surface-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 251, 255, 0.9));
+}
+
+:root[data-theme="dark"] {
+  --bg: #061726;
+  --bg-strong: #0a2740;
+  --panel: rgba(8, 30, 49, 0.9);
+  --panel-border: rgba(0, 203, 183, 0.18);
+  --text: #eef9ff;
+  --muted: #9ab8cf;
+  --accent: #00cbb7;
+  --accent-dark: #009cf4;
+  --accent-deep: #a8eaff;
+  --critical: #ff7f96;
+  --high: #58bbff;
+  --medium: #3be1d0;
+  --low: #92cfff;
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+  --topbar-control-bg: rgba(8, 30, 49, 0.92);
+  --topbar-control-text: #eef9ff;
+  --topbar-control-border: rgba(0, 203, 183, 0.18);
+  --table-row-hover: rgba(0, 203, 183, 0.12);
+  --table-row-selected: rgba(0, 156, 244, 0.18);
+  --surface-strong: linear-gradient(180deg, rgba(11, 40, 66, 0.96), rgba(6, 23, 38, 0.92));
 }
 
 * {
@@ -151,14 +180,29 @@ th {
 
 .topbar-meta {
   display: flex;
+  align-items: center;
   gap: 12px;
+}
+
+.theme-toggle {
+  border: 1px solid var(--topbar-control-border);
+  background: var(--topbar-control-bg);
+  color: var(--topbar-control-text);
+  border-radius: 999px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-1px);
 }
 
 .meta-chip {
   min-width: 110px;
   padding: 12px 14px;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 251, 255, 0.92));
+  background: var(--surface-strong);
   border: 1px solid var(--panel-border);
 }
 
@@ -325,11 +369,11 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: rgba(0, 203, 183, 0.08);
+  background: var(--table-row-hover);
 }
 
 tbody tr.selected-row {
-  background: rgba(0, 156, 244, 0.1);
+  background: var(--table-row-selected);
   box-shadow: inset 4px 0 0 var(--accent-dark);
 }
 
@@ -382,7 +426,7 @@ tbody tr.selected-row {
 .trend-card {
   padding: 14px;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 251, 255, 0.88));
+  background: var(--surface-strong);
   border: 1px solid rgba(0, 156, 244, 0.12);
 }
 
@@ -407,7 +451,7 @@ tbody tr.selected-row {
 .timeline-item {
   padding: 14px 16px;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 251, 255, 0.88));
+  background: var(--surface-strong);
   border: 1px solid rgba(0, 156, 244, 0.12);
 }
 
@@ -471,5 +515,13 @@ tbody tr.selected-row {
 
   .sidebar {
     margin-bottom: 4px;
+  }
+
+  .topbar {
+    align-items: stretch;
+  }
+
+  .topbar-meta {
+    flex-wrap: wrap;
   }
 }
