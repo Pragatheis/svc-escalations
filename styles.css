@@ -1,18 +1,18 @@
 :root {
-  --bg: #f5efe4;
-  --bg-strong: #efe3d0;
-  --panel: rgba(255, 252, 246, 0.78);
-  --panel-border: rgba(78, 55, 32, 0.12);
-  --text: #25180f;
-  --muted: #715d4e;
-  --accent: #c65d2c;
-  --accent-dark: #8c3812;
-  --olive: #57643a;
-  --critical: #9d1f1f;
-  --high: #c65d2c;
-  --medium: #9d7a16;
-  --low: #4e7b61;
-  --shadow: 0 20px 60px rgba(82, 54, 30, 0.12);
+  --bg: #ffffff;
+  --bg-strong: #f4fbff;
+  --panel: rgba(255, 255, 255, 0.96);
+  --panel-border: rgba(0, 55, 99, 0.12);
+  --text: #003763;
+  --muted: #4f6f88;
+  --accent: #00cbb7;
+  --accent-dark: #009cf4;
+  --accent-deep: #003763;
+  --critical: #c43d5a;
+  --high: #009cf4;
+  --medium: #00cbb7;
+  --low: #6ba3c7;
+  --shadow: 0 22px 60px rgba(0, 55, 99, 0.12);
   --radius: 24px;
 }
 
@@ -24,9 +24,9 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(198, 93, 44, 0.22), transparent 30%),
-    radial-gradient(circle at right, rgba(87, 100, 58, 0.18), transparent 25%),
-    linear-gradient(180deg, #f8f3eb, var(--bg));
+    radial-gradient(circle at top left, rgba(0, 203, 183, 0.16), transparent 30%),
+    radial-gradient(circle at right, rgba(0, 156, 244, 0.16), transparent 32%),
+    linear-gradient(180deg, #ffffff, var(--bg-strong));
   color: var(--text);
   font-family: "Space Grotesk", sans-serif;
 }
@@ -119,8 +119,9 @@ th {
 .sidebar-card {
   margin-top: auto;
   padding: 18px;
-  background: rgba(87, 100, 58, 0.09);
+  background: linear-gradient(180deg, rgba(0, 203, 183, 0.08), rgba(0, 156, 244, 0.08));
   border-radius: 20px;
+  border: 1px solid rgba(0, 156, 244, 0.12);
 }
 
 .sidebar-stats {
@@ -157,7 +158,7 @@ th {
   min-width: 110px;
   padding: 12px 14px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.68);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 251, 255, 0.92));
   border: 1px solid var(--panel-border);
 }
 
@@ -200,6 +201,17 @@ th {
 .panel {
   border-radius: var(--radius);
   padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-dark), var(--accent-deep));
 }
 
 .panel-header {
@@ -230,9 +242,16 @@ textarea {
   width: 100%;
   padding: 12px 14px;
   border-radius: 16px;
-  border: 1px solid rgba(95, 67, 42, 0.16);
-  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 55, 99, 0.14);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--text);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid rgba(0, 203, 183, 0.22);
+  border-color: rgba(0, 156, 244, 0.48);
 }
 
 textarea {
@@ -254,13 +273,13 @@ textarea {
 }
 
 .secondary-btn {
-  background: rgba(87, 100, 58, 0.14);
-  color: var(--olive);
+  background: rgba(0, 156, 244, 0.1);
+  color: var(--accent-deep);
 }
 
 .secondary-btn:hover {
   transform: translateY(-1px);
-  background: rgba(87, 100, 58, 0.22);
+  background: rgba(0, 156, 244, 0.18);
 }
 
 .note-card {
@@ -269,7 +288,8 @@ textarea {
   margin-top: 18px;
   padding: 16px;
   border-radius: 18px;
-  background: rgba(37, 24, 15, 0.04);
+  background: linear-gradient(180deg, rgba(0, 203, 183, 0.06), rgba(0, 156, 244, 0.05));
+  border: 1px solid rgba(0, 156, 244, 0.12);
 }
 
 .note-card code {
@@ -296,15 +316,21 @@ th,
 td {
   text-align: left;
   padding: 12px 10px;
-  border-bottom: 1px solid rgba(95, 67, 42, 0.1);
+  border-bottom: 1px solid rgba(0, 55, 99, 0.08);
 }
 
 tbody tr {
   cursor: pointer;
+  transition: background 160ms ease, box-shadow 160ms ease;
 }
 
 tbody tr:hover {
-  background: rgba(198, 93, 44, 0.06);
+  background: rgba(0, 203, 183, 0.08);
+}
+
+tbody tr.selected-row {
+  background: rgba(0, 156, 244, 0.1);
+  box-shadow: inset 4px 0 0 var(--accent-dark);
 }
 
 .status-pill,
@@ -321,8 +347,8 @@ tbody tr:hover {
 .status-pending,
 .status-monitoring,
 .status-closed {
-  background: rgba(87, 100, 58, 0.12);
-  color: var(--olive);
+  background: rgba(0, 156, 244, 0.1);
+  color: var(--accent-deep);
 }
 
 .severity-critical {
@@ -336,12 +362,12 @@ tbody tr:hover {
 }
 
 .severity-medium {
-  background: rgba(157, 122, 22, 0.14);
+  background: rgba(0, 203, 183, 0.12);
   color: var(--medium);
 }
 
 .severity-low {
-  background: rgba(78, 123, 97, 0.14);
+  background: rgba(107, 163, 199, 0.14);
   color: var(--low);
 }
 
@@ -356,8 +382,8 @@ tbody tr:hover {
 .trend-card {
   padding: 14px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(95, 67, 42, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 251, 255, 0.88));
+  border: 1px solid rgba(0, 156, 244, 0.12);
 }
 
 .meta-block strong,
@@ -381,8 +407,8 @@ tbody tr:hover {
 .timeline-item {
   padding: 14px 16px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.66);
-  border: 1px solid rgba(95, 67, 42, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 251, 255, 0.88));
+  border: 1px solid rgba(0, 156, 244, 0.12);
 }
 
 .list-item strong,
@@ -409,9 +435,9 @@ tbody tr:hover {
 
 .empty-state {
   padding: 28px;
-  border: 1px dashed rgba(95, 67, 42, 0.2);
+  border: 1px dashed rgba(0, 156, 244, 0.26);
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.44);
+  background: rgba(244, 251, 255, 0.72);
 }
 
 .empty-state.small {
