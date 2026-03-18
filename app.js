@@ -96,6 +96,7 @@ const state = {
     owner: "All",
     week: "All"
   },
+  searchTerm: "",
   currentView: "intake"
 };
 
@@ -111,12 +112,16 @@ const els = {
   intakeForm: document.getElementById("intakeForm"),
   parseTicketBtn: document.getElementById("parseTicketBtn"),
   ticketPaste: document.getElementById("ticketPaste"),
+  listHighlights: document.getElementById("listHighlights"),
+  listSearch: document.getElementById("listSearch"),
   filterBar: document.getElementById("filterBar"),
   listTableBody: document.getElementById("listTableBody"),
   detailEmpty: document.getElementById("detailEmpty"),
   detailContent: document.getElementById("detailContent"),
   detailTitle: document.getElementById("detailTitle"),
   detailBadge: document.getElementById("detailBadge"),
+  detailHero: document.getElementById("detailHero"),
+  detailLinks: document.getElementById("detailLinks"),
   detailMeta: document.getElementById("detailMeta"),
   detailDescription: document.getElementById("detailDescription"),
   detailActions: document.getElementById("detailActions"),
@@ -149,6 +154,7 @@ function bindEvents() {
   els.actionForm.addEventListener("submit", handleAddAction);
   els.noteForm.addEventListener("submit", handleAddNote);
   els.themeToggle.addEventListener("click", toggleTheme);
+  els.listSearch.addEventListener("input", handleSearchInput);
 }
 
 function setView(view) {
@@ -168,6 +174,7 @@ function render() {
   renderHeaderStats();
   renderSidebarStats();
   renderFilters();
+  renderListHighlights();
   renderList();
   renderDetail();
   renderReview();
@@ -244,6 +251,7 @@ function renderFilters() {
 function renderList() {
   const filtered = getFilteredRecords();
   els.listTableBody.innerHTML = "";
+  els.listSearch.value = state.searchTerm;
 
   if (!filtered.length) {
     const row = document.createElement("tr");
@@ -290,10 +298,12 @@ function renderDetail() {
 
   els.detailEmpty.classList.add("hidden");
   els.detailContent.classList.remove("hidden");
-  els.detailTitle.textContent = `${record.id} · ${record.summary}`;
+  els.detailTitle.textContent = `${record.ticketNumber || record.id} · ${record.summary}`;
   els.detailBadge.className = `status-pill status-${record.status.toLowerCase()}`;
   els.detailBadge.textContent = record.status;
   els.detailDescription.textContent = record.description;
+  renderDetailHero(record);
+  renderDetailLinks(record);
 
   els.detailMeta.innerHTML = "";
   [
@@ -424,6 +434,26 @@ function renderReview() {
   });
 }
 
+function renderListHighlights() {
+  const open = state.records.filter((item) => item.status !== "Closed").length;
+  const overdue = state.records.flatMap((item) => item.actions.filter((action) => !action.done && isPast(action.dueDate))).length;
+  const critical = state.records.filter((item) => item.severity === "Critical" && item.status !== "Closed").length;
+  const depot = state.records.filter((item) => item.sourceFunction === "Depot" && item.status !== "Closed").length;
+
+  els.listHighlights.innerHTML = "";
+  [
+    ["Open", open, "Active backlog this week"],
+    ["Overdue", overdue, "Action items past due"],
+    ["Critical", critical, "High-risk escalations"],
+    ["Depot Open", depot, "Depot-owned active work"]
+  ].forEach(([label, value, subline]) => {
+    const card = document.createElement("div");
+    card.className = "highlight-card";
+    card.innerHTML = `<span class="eyebrow">${label}</span><strong>${value}</strong><small>${subline}</small>`;
+    els.listHighlights.appendChild(card);
+  });
+}
+
 function handleCreateEscalation(event) {
   event.preventDefault();
   const formData = new FormData(event.target);
@@ -478,6 +508,11 @@ function handleParseTicket() {
     const field = els.intakeForm.elements.namedItem(key);
     if (field && value) field.value = value;
   });
+}
+
+function handleSearchInput(event) {
+  state.searchTerm = event.target.value.trim().toLowerCase();
+  renderList();
 }
 
 function handleAddAction(event) {
@@ -579,7 +614,7 @@ function getFilteredRecords() {
       if (value === "All") return true;
       if (key === "week") return getWeekLabel(item.createdAt) === value;
       return item[key] === value;
-    })
+    }) && matchesSearch(item)
   );
 }
 
@@ -678,6 +713,69 @@ function buildTrendCards() {
   ];
 }
 
+function matchesSearch(item) {
+  if (!state.searchTerm) return true;
+  const haystack = [
+    item.ticketNumber,
+    item.customer,
+    item.vendor,
+    item.category,
+    item.summary,
+    item.description,
+    item.equipment,
+    item.sourceFunction
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(state.searchTerm);
+}
+
+function renderDetailHero(record) {
+  const ageDays = Math.max(0, Math.floor((Date.now() - new Date(record.createdAt).getTime()) / 86400000));
+  const nextAction = record.actions.find((action) => !action.done);
+  const tiles = [
+    { label: "Customer", value: record.customer, image: buildAvatar(record.customer, "#00CBB7", "#009CF4") },
+    { label: "Vendor", value: record.vendor, image: buildAvatar(record.vendor, "#009CF4", "#003763") },
+    { label: "Equipment", value: record.equipment || "Unspecified", image: buildAvatar(record.equipment || "EQ", "#003763", "#00CBB7") }
+  ];
+
+  els.detailHero.innerHTML = `
+    <div class="identity-strip">
+      ${tiles
+        .map(
+          (tile) => `
+            <article class="identity-card">
+              <img src="${tile.image}" alt="${tile.label}" />
+              <div>
+                <span class="eyebrow">${tile.label}</span>
+                <strong>${tile.value}</strong>
+              </div>
+            </article>
+          `
+        )
+        .join("")}
+    </div>
+    <div class="next-action-card">
+      <span class="eyebrow">Next Best Action</span>
+      <strong>${nextAction?.title || "No open action"}</strong>
+      <small>${nextAction ? `${nextAction.owner} · Due ${formatDate(nextAction.dueDate)}` : `${ageDays} days old`}</small>
+    </div>
+  `;
+}
+
+function renderDetailLinks(record) {
+  const links = [
+    { label: "Customer Search", href: buildSearchUrl(record.customer) },
+    { label: "Vendor Search", href: buildSearchUrl(record.vendor) },
+    { label: "Ticket Search", href: buildSearchUrl(record.ticketNumber && record.ticketNumber !== "NA" ? record.ticketNumber : `${record.customer} ${record.summary}`) }
+  ];
+
+  els.detailLinks.innerHTML = links
+    .map((link) => `<a class="link-chip" href="${link.href}" target="_blank" rel="noreferrer">${link.label}</a>`)
+    .join("");
+}
+
 function formatDate(value) {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
 }
@@ -738,4 +836,35 @@ function toggleTheme() {
 
 function updateThemeToggleLabel(theme) {
   els.themeToggleLabel.textContent = theme === "dark" ? "Light mode" : "Dark mode";
+}
+
+function buildSearchUrl(query) {
+  return `https://www.google.com/search?q=${encodeURIComponent(query || "")}`;
+}
+
+function buildAvatar(label, startColor, endColor) {
+  const initials = getInitials(label);
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+      <defs>
+        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${startColor}"/>
+          <stop offset="100%" stop-color="${endColor}"/>
+        </linearGradient>
+      </defs>
+      <rect width="96" height="96" rx="24" fill="url(#g)"/>
+      <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="30" font-weight="700" fill="white">${initials}</text>
+    </svg>
+  `;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function getInitials(label) {
+  return String(label || "?")
+    .replace(/[^A-Za-z0-9 ]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "?";
 }
