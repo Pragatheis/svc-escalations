@@ -121,6 +121,7 @@ const els = {
   detailTitle: document.getElementById("detailTitle"),
   detailBadge: document.getElementById("detailBadge"),
   detailHero: document.getElementById("detailHero"),
+  detailControls: document.getElementById("detailControls"),
   detailLinks: document.getElementById("detailLinks"),
   detailMeta: document.getElementById("detailMeta"),
   detailDescription: document.getElementById("detailDescription"),
@@ -303,6 +304,7 @@ function renderDetail() {
   els.detailBadge.textContent = record.status;
   els.detailDescription.textContent = record.description;
   renderDetailHero(record);
+  renderDetailControls(record);
   renderDetailLinks(record);
 
   els.detailMeta.innerHTML = "";
@@ -434,6 +436,38 @@ function renderReview() {
   });
 }
 
+function renderDetailControls(record) {
+  const ownerOptions = uniqueValues("owner")
+    .filter(Boolean)
+    .filter((owner) => owner !== record.owner);
+
+  els.detailControls.innerHTML = `
+    <section class="control-card">
+      <span class="eyebrow">Status Control</span>
+      <div class="status-toggle-group">
+        <button class="status-toggle ${record.status !== "Closed" ? "active" : ""}" data-status-target="Open" type="button">Open</button>
+        <button class="status-toggle ${record.status === "Closed" ? "active" : ""}" data-status-target="Closed" type="button">${record.status === "Closed" ? "Closed" : "Close Ticket"}</button>
+      </div>
+    </section>
+    <section class="control-card">
+      <span class="eyebrow">Owner Assignment</span>
+      <form id="ownerForm" class="owner-form">
+        <input name="owner" value="${escapeAttribute(record.owner || "")}" list="ownerSuggestions" placeholder="Assign owner" required />
+        <datalist id="ownerSuggestions">
+          ${ownerOptions.map((owner) => `<option value="${escapeAttribute(owner)}"></option>`).join("")}
+        </datalist>
+        <button class="secondary-btn" type="submit">Save owner</button>
+      </form>
+    </section>
+  `;
+
+  els.detailControls.querySelectorAll("[data-status-target]").forEach((button) => {
+    button.addEventListener("click", () => updateRecordStatus(button.dataset.statusTarget));
+  });
+
+  els.detailControls.querySelector("#ownerForm").addEventListener("submit", handleOwnerAssignment);
+}
+
 function renderListHighlights() {
   const open = state.records.filter((item) => item.status !== "Closed").length;
   const overdue = state.records.flatMap((item) => item.actions.filter((action) => !action.done && isPast(action.dueDate))).length;
@@ -541,6 +575,26 @@ function handleAddAction(event) {
   render();
 }
 
+function handleOwnerAssignment(event) {
+  event.preventDefault();
+  const record = getSelectedRecord();
+  if (!record) return;
+
+  const nextOwner = new FormData(event.target).get("owner").trim();
+  if (!nextOwner || nextOwner === record.owner) return;
+
+  const previousOwner = record.owner || "Unassigned";
+  record.owner = nextOwner;
+  record.history.unshift({
+    id: crypto.randomUUID(),
+    type: "Owner",
+    message: `Owner changed from ${previousOwner} to ${nextOwner}`,
+    createdAt: new Date().toISOString()
+  });
+
+  render();
+}
+
 function handleAddNote(event) {
   event.preventDefault();
   const record = getSelectedRecord();
@@ -589,6 +643,23 @@ function completeAction(actionId) {
       createdAt: new Date().toISOString()
     });
   }
+
+  render();
+}
+
+function updateRecordStatus(nextStatus) {
+  const record = getSelectedRecord();
+  if (!record || record.status === nextStatus) return;
+
+  const previousStatus = record.status;
+  record.status = nextStatus;
+  record.closedAt = nextStatus === "Closed" ? new Date().toISOString() : null;
+  record.history.unshift({
+    id: crypto.randomUUID(),
+    type: "Status",
+    message: `Status changed from ${previousStatus} to ${nextStatus}`,
+    createdAt: new Date().toISOString()
+  });
 
   render();
 }
@@ -867,4 +938,8 @@ function getInitials(label) {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join("") || "?";
+}
+
+function escapeAttribute(value) {
+  return String(value).replace(/"/g, "&quot;");
 }
