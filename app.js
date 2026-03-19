@@ -271,7 +271,7 @@ function renderList() {
       tr.classList.add("selected-row");
     }
     tr.innerHTML = `
-      <td>${item.ticketNumber || "NA"}</td>
+      <td class="ticket-col">${item.ticketNumber || "NA"}</td>
       <td>${item.sourceFunction || "Service"}</td>
       <td>${item.customer}</td>
       <td>${item.vendor}</td>
@@ -279,8 +279,8 @@ function renderList() {
       <td><span class="status-pill status-${item.status.toLowerCase()}">${item.status}</span></td>
       <td><span class="severity-pill severity-${item.severity.toLowerCase()}">${item.severity}</span></td>
       <td>${item.owner}</td>
-      <td>${getWeekLabel(item.createdAt)}</td>
-      <td>${item.actions.find((action) => !action.done)?.title || "No open actions"}</td>
+      <td class="week-col">${getWeekLabel(item.createdAt)}</td>
+      <td class="action-col">${item.actions.find((action) => !action.done)?.title || "No open actions"}</td>
     `;
     tr.addEventListener("click", () => {
       state.selectedId = item.id;
