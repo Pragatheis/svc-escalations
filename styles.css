@@ -538,6 +538,7 @@ textarea {
 table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
 }
 
 th,
@@ -545,6 +546,21 @@ td {
   text-align: left;
   padding: 12px 10px;
   border-bottom: 1px solid rgba(0, 55, 99, 0.08);
+  vertical-align: top;
+}
+
+.ticket-col {
+  white-space: nowrap;
+  min-width: 96px;
+}
+
+.week-col {
+  white-space: nowrap;
+  min-width: 138px;
+}
+
+.action-col {
+  min-width: 260px;
 }
 
 tbody tr {
