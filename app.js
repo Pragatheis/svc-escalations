@@ -114,6 +114,8 @@ const els = {
   ticketPaste: document.getElementById("ticketPaste"),
   listHighlights: document.getElementById("listHighlights"),
   listSearch: document.getElementById("listSearch"),
+  exportFilteredBtn: document.getElementById("exportFilteredBtn"),
+  exportAllBtn: document.getElementById("exportAllBtn"),
   filterBar: document.getElementById("filterBar"),
   listTableBody: document.getElementById("listTableBody"),
   detailEmpty: document.getElementById("detailEmpty"),
@@ -156,6 +158,8 @@ function bindEvents() {
   els.noteForm.addEventListener("submit", handleAddNote);
   els.themeToggle.addEventListener("click", toggleTheme);
   els.listSearch.addEventListener("input", handleSearchInput);
+  els.exportFilteredBtn.addEventListener("click", () => exportRecords("filtered"));
+  els.exportAllBtn.addEventListener("click", () => exportRecords("all"));
 }
 
 function setView(view) {
@@ -907,6 +911,62 @@ function toggleTheme() {
 
 function updateThemeToggleLabel(theme) {
   els.themeToggleLabel.textContent = theme === "dark" ? "Light mode" : "Dark mode";
+}
+
+function exportRecords(mode) {
+  const records = mode === "all" ? state.records : getFilteredRecords();
+  const rows = records.map((record) => ({
+    ticket_number: record.ticketNumber || "NA",
+    function: record.sourceFunction || "",
+    customer: record.customer || "",
+    vendor: record.vendor || "",
+    category: record.category || "",
+    status: record.status || "",
+    severity: record.severity || "",
+    owner: record.owner || "",
+    summary: record.summary || "",
+    description: record.description || "",
+    equipment: record.equipment || "",
+    due_date: record.dueDate || "",
+    created_at: record.createdAt || "",
+    closed_at: record.closedAt || "",
+    next_action: record.actions.find((action) => !action.done)?.title || "",
+    notes: record.notes.map((note) => note.content).join(" | ")
+  }));
+
+  const csv = toCsv(rows);
+  const filename = `escalations-${mode}-${new Date().toISOString().slice(0, 10)}.csv`;
+  downloadFile(filename, csv, "text/csv;charset=utf-8;");
+}
+
+function toCsv(rows) {
+  if (!rows.length) {
+    return "ticket_number,function,customer,vendor,category,status,severity,owner,summary,description,equipment,due_date,created_at,closed_at,next_action,notes\n";
+  }
+
+  const headers = Object.keys(rows[0]);
+  const lines = [
+    headers.join(","),
+    ...rows.map((row) =>
+      headers
+        .map((header) => `"${String(row[header] ?? "").replace(/"/g, '""')}"`)
+        .join(",")
+    )
+  ];
+
+  return lines.join("\n");
+}
+
+function downloadFile(filename, content, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function buildSearchUrl(query) {
