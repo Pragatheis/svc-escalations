@@ -325,6 +325,49 @@ th {
   margin-bottom: 18px;
 }
 
+.detail-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.control-card {
+  padding: 16px;
+  border-radius: 22px;
+  background: var(--surface-strong);
+  border: 1px solid rgba(0, 156, 244, 0.12);
+  display: grid;
+  gap: 12px;
+}
+
+.status-toggle-group,
+.owner-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-toggle {
+  border: 1px solid rgba(0, 156, 244, 0.16);
+  background: rgba(0, 156, 244, 0.08);
+  color: var(--accent-deep);
+  border-radius: 999px;
+  padding: 11px 15px;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.status-toggle.active,
+.status-toggle:hover {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: #fff;
+}
+
+.owner-form input {
+  flex: 1 1 220px;
+}
+
 .link-chip {
   display: inline-flex;
   align-items: center;
@@ -658,6 +701,7 @@ tbody tr.selected-row {
   }
 
   .detail-hero,
+  .detail-controls,
   .identity-strip {
     grid-template-columns: 1fr;
   }
